@@ -1,0 +1,1409 @@
+openapi: 3.1.0
+info:
+  title: Eversity JWT
+  version: 0.9.0
+  summary: Eversity Server API
+  description: 'Eversity API. As every server is (at least now) self-hosted, there are no public test servers (however, some public mock servers are being thought of)'
+  license:
+    name: GNU AGPL-3.0
+    identifier: AGPL-3.0-only
+  contact:
+    url: 'https://github.com/enrollie/Eversity-Server'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /auth/login:
+    post:
+      summary: ''
+      operationId: post-auth-login
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: object
+                properties:
+                  userID:
+                    type: string
+                  token:
+                    type: string
+              examples:
+                Example token:
+                  value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJFbnJvbGxpZS9FdmVyc2l0eUpXVCIsImlzcyI6IkVucm9sbGllLUV2ZXJzaXR5SldUIiwidXNlcklEIjoiMTMzNzY5IiwidG9rZW4iOiIzOGZjOGYxZC0wYWFiLTQ2NWQtYjI4Ni1kMGViZDFlYmJhNDMifQ.kAeoAX0Q7FeMegDOPAMiYcXPWjAnGcNVTI9MkTbLAGk
+        '401':
+          description: 'Returned, when Schools.by rejected user''s credentials'
+        '503':
+          description: 'Schools.by is unavailable, so authorization cannot happen'
+          headers:
+            Retry-After:
+              schema:
+                type: number
+              description: Time in seconds until next retry is suggested
+      description: Authenticates user with Schools.by credentials and issues Eversity JWT token
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+        description: User's Schools.by credentials
+      tags:
+        - Auth
+  /auth/tokens:
+    parameters: []
+    delete:
+      summary: ''
+      operationId: delete-auth-tokens
+      description: Invalidates all tokens (including one supplied with the request)
+      responses:
+        '200':
+          description: All tokens are invalidated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      tags:
+        - Auth
+  /auth/tokens/current:
+    parameters: []
+    delete:
+      summary: ''
+      operationId: delete-auth-tokens-current
+      responses:
+        '200':
+          description: Token invalidated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: 'Invalidates token, supplied with the request (effectievly signs user out)'
+  '/auth/{userId}/tokens':
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+              examples:
+                Example:
+                  value:
+                    count: 12
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      operationId: get-users-tokens
+      description: Gets count of user's tokens.
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: -1
+        description: ID of user. (-1) evaluates to "Current user"
+    delete:
+      summary: ''
+      operationId: delete-auth-userId-tokens
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      description: Invalidates user's tokens
+      parameters: []
+  '/user/{userId}':
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: -1
+        description: ID of user. (-1) evaluates to "Current user"
+    get:
+      summary: Get User Info by User ID
+      tags: []
+      responses:
+        '200':
+          description: User Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Administration user info:
+                  value:
+                    id: 12753
+                    type: Administration
+                    firstName: Степан
+                    middleName: Андреевич
+                    lastName: Стэтхем
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      operationId: get-users-userId
+      description: Retrieve the information of the user with the matching user ID.
+  '/user/{userId}/timetable':
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: -1
+        description: ID of user. (-1) evaluates to "Current user"
+    get:
+      summary: Get user timetable
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timetable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      operationId: get-users-userId-timetable
+      description: Returns full-week user timetable
+      parameters: []
+  '/user/{userId}/timetable/today':
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: -1
+        description: ID of user. (-1) evaluates to "Current user"
+    get:
+      summary: Get user timetable for request date
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  first:
+                    type:
+                      - array
+                      - 'null'
+                    items:
+                      $ref: '#/components/schemas/Lesson-data'
+                  second:
+                    type:
+                      - array
+                      - 'null'
+                    items:
+                      $ref: '#/components/schemas/Lesson-data'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      operationId: get-users-userId-timetable-by-date
+      description: Returns user timetable for request date
+      parameters: []
+  '/user/{userId}/timetable/today/current':
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: -1
+        description: ID of user. (-1) evaluates to "Current user"
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lesson:
+                    oneOf:
+                      - $ref: '#/components/schemas/Lesson-data'
+                      - type: 'null'
+                        properties: {}
+              examples:
+                Lesson:
+                  value:
+                    place: 5
+                    title: Всемир. ист.
+                    schedule:
+                      startH: 13
+                      startM: 0
+                      endH: 13
+                      endM: 45
+                    classID: 26215
+                No lesson:
+                  value:
+                    lesson: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      operationId: get-users-userId-timetable-current
+      description: 'Returns current lesson for requested user. If user does not have any lessons right now, endpoint will return null.'
+  '/user/{userId}/integrations':
+    parameters:
+      - $ref: '#/components/parameters/userId'
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    integrationID:
+                      type: string
+                    publicName:
+                      type: string
+                    connected:
+                      type: boolean
+        '201':
+          $ref: '#/components/responses/User-not-found'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      operationId: get-users-userId-integrations
+      description: 'Returns all user integrations with other services (i.e. Telegram), including not connected, but available'
+    put:
+      summary: ''
+      operationId: put-user-userId-integrations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  integrationType:
+                    type: string
+                  pairData:
+                    type: object
+                    description: 'Pair data, requested by integration. Since different integrations have different pairing process, there is no standard defined data-schema. Please, see integration docs for defined schema'
+        '400':
+          description: Integration does not exist
+        '404':
+          $ref: '#/components/responses/User-not-found'
+        '409':
+          description: Integration is already connected
+      description: Create integration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                integrationID:
+                  type: string
+        description: Creates new integration
+    delete:
+      summary: ''
+      operationId: delete-user-userId-integrations
+      responses:
+        '202':
+          description: 'Accepted for processing. Integration removal is scheduled, but may not be removed immediately.'
+        '400':
+          description: Integration does not exist or it's not connected
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      description: Deletes an integration from user account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                integrationID:
+                  type: string
+  '/class/{classId}':
+    parameters:
+      - name: classId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Class ID
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/Class-not-found'
+      operationId: get-classes-classId
+  '/class/{classId}/absence':
+    parameters:
+      - name: classId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Class ID
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    pupil:
+                      $ref: '#/components/schemas/User'
+                    absences:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Absence'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/Class-not-found'
+      operationId: get-classes-classId-absence
+      description: Gets absences summary for range of given dates (defaults to current week)
+      parameters:
+        - schema:
+            type: string
+            format: date
+            pattern: '([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))'
+          in: query
+          name: beginDate
+          allowEmptyValue: true
+          description: Range begin date in YYYY-MM-dd format
+          style: form
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: endDate
+          description: Range end date in YYYY-MM-dd format
+          style: form
+    post:
+      summary: Send absence data
+      operationId: post-class-classId-absence
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/Class-not-found'
+      requestBody:
+        $ref: '#/components/requestBodies/Absence-post-data'
+      description: 'Send absence data. Please, see docs/absence.md for absence accounting process'
+  '/class/{classId}/absence/{date}':
+    parameters:
+      - $ref: '#/components/parameters/classId'
+      - schema:
+          type: string
+          format: date
+        name: date
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Absence'
+        '404':
+          $ref: '#/components/responses/Class-not-found'
+      operationId: get-class-classId-absence-date
+      description: Gets absence for only one given date
+  '/class/{classId}/pupils':
+    parameters:
+      - schema:
+          type: string
+        name: classId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses: {}
+      operationId: get-class-classId-pupils
+      description: Returns class pupils list
+  '/class/{classId}/timetable':
+    parameters:
+      - $ref: '#/components/parameters/classId'
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timetable'
+      operationId: get-classes-classId-pupils
+      description: Returns class timetable
+  '/class/{classId}/timetable/today':
+    parameters:
+      - schema:
+          type: string
+        name: classId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses: {}
+      operationId: get-class-classId-timetable-today
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first:
+                  type:
+                    - array
+                    - 'null'
+                  items:
+                    $ref: '#/components/schemas/Lesson-data'
+                second:
+                  type:
+                    - array
+                    - 'null'
+                  items:
+                    $ref: '#/components/schemas/Lesson-data'
+      description: Returns timetable for request date (counted from server's timezone)
+  '/class/{classId}/timetable/today/current':
+    parameters:
+      - schema:
+          type: string
+        name: classId
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Lesson-data'
+                  - type: 'null'
+                    properties: {}
+              examples: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/Class-not-found'
+      operationId: get-class-classId-timetable-today-current
+      description: Returns current lesson (based on server's timezone)
+  /absence/statistics:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                x-examples:
+                  example-1:
+                    pupilCount:
+                      first: 0
+                      second: 0
+                    absenceStatistics:
+                      first:
+                        ILLNESS: 0
+                        HEALING: 0
+                        REQUEST: 0
+                        COMPETITION: 0
+                        UNKNOWN: 0
+                      second:
+                        ILLNESS: 0
+                        HEALING: 0
+                        REQUEST: 0
+                        COMPETITION: 0
+                        UNKNOWN: 0
+                properties:
+                  pupilCount:
+                    type: object
+                    required:
+                      - first
+                      - second
+                    description: 'Count of pupils in whole school, broke down by shifts'
+                    properties:
+                      first:
+                        type: integer
+                      second:
+                        type: integer
+                  absenceStatistics:
+                    type: object
+                    required:
+                      - first
+                      - second
+                    description: Summary of absence statistics broke down by shifts
+                    properties:
+                      first:
+                        type: object
+                        properties:
+                          ILLNESS:
+                            type: integer
+                          HEALING:
+                            type: integer
+                          REQUEST:
+                            type: integer
+                          COMPETITION:
+                            type: integer
+                          UNKNOWN:
+                            type: integer
+                      second:
+                        type: object
+                        required:
+                          - ILLNESS
+                          - HEALING
+                          - REQUEST
+                          - COMPETITION
+                          - UNKNOWN
+                        properties:
+                          ILLNESS:
+                            type: integer
+                          HEALING:
+                            type: integer
+                          REQUEST:
+                            type: integer
+                          COMPETITION:
+                            type: integer
+                          UNKNOWN:
+                            type: integer
+                required:
+                  - pupilCount
+                  - absenceStatistics
+              examples:
+                Example:
+                  value:
+                    pupilCount:
+                      first: 10
+                      second: 0
+                    absenceStatistics:
+                      first:
+                        ILLNESS: 1
+                        HEALING: 1
+                        REQUEST: 1
+                        COMPETITION: 1
+                        UNKNOWN: 5
+                      second:
+                        ILLNESS: 0
+                        HEALING: 0
+                        REQUEST: 0
+                        COMPETITION: 0
+                        UNKNOWN: 0
+      operationId: get-absence-statistics
+      description: Returns current whole school absence statistics summary by shifts and by reasons.
+  /absence/statistics/extended:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                    middleName:
+                      type:
+                        - string
+                        - 'null'
+                    lastName:
+                      type: string
+                    absenceReason:
+                      $ref: '#/components/schemas/Absence-reason'
+                    classID:
+                      type: integer
+      operationId: get-absence-statistics-extended
+      description: Returns extended absence statistics with data on every absent pupil
+components:
+  schemas:
+    User:
+      description: 'User datascheme. Middle name is null for everyone except Teacher, Administration, and Social type.'
+      type: object
+      x-examples:
+        example-1:
+          id: '652966'
+          type: Administration
+          firstName: Татьяна
+          middleName: Михайловна
+          lastName: Ширяева
+      examples:
+        - id: 12753
+          type: TEACHER
+          firstName: Степан
+          middleName: Андреевич
+          lastName: Стэтхем
+          classID: null
+        - id: 123
+          type: PUPIL
+          firstName: Андрей
+          middleName: null
+          lastName: Панин
+          classID: 13372
+        - id: 1111
+          type: PARENT
+          firstName: Андрей
+          middleName: Андреевич
+          lastName: Стэтхем
+          classID: null
+      properties:
+        id:
+          type: integer
+        type:
+          $ref: '#/components/schemas/User-Type'
+        firstName:
+          type: string
+          minLength: 1
+        middleName:
+          type:
+            - string
+            - 'null'
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        classID:
+          type:
+            - number
+            - 'null'
+      required:
+        - id
+        - type
+        - firstName
+        - middleName
+        - lastName
+    Timetable:
+      description: Contains timetables for each of two shifts
+      type: object
+      x-examples:
+        example-1:
+          first:
+            MONDAY:
+              - place: 1
+                title: Ист. Бел.
+                schedule:
+                  startH: 9
+                  startM: 0
+                  endH: 9
+                  endM: 45
+                classID: 26516
+              - place: 2
+                title: Ист. Бел.
+                schedule:
+                  startH: 10
+                  startM: 0
+                  endH: 10
+                  endM: 45
+                classID: 26517
+              - place: 5
+                title: Ист. Бел.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26216
+              - place: 6
+                title: Ист. Бел.
+                schedule:
+                  startH: 13
+                  startM: 55
+                  endH: 14
+                  endM: 40
+                classID: 26215
+            TUESDAY:
+              - place: 0
+                title: Кл. час
+                schedule:
+                  startH: 8
+                  startM: 30
+                  endH: 8
+                  endM: 55
+                classID: 26517
+              - place: 1
+                title: Ист. Бел.
+                schedule:
+                  startH: 9
+                  startM: 0
+                  endH: 9
+                  endM: 45
+                classID: 26518
+              - place: 2
+                title: Ист. Бел.
+                schedule:
+                  startH: 10
+                  startM: 0
+                  endH: 10
+                  endM: 45
+                classID: 26519
+              - place: 4
+                title: Ист. Бел.
+                schedule:
+                  startH: 12
+                  startM: 0
+                  endH: 12
+                  endM: 45
+                classID: 24268
+              - place: 5
+                title: Ист. Бел.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 24267
+              - place: 6
+                title: Ист. Бел.
+                schedule:
+                  startH: 13
+                  startM: 55
+                  endH: 14
+                  endM: 40
+                classID: 26520
+              - place: 7
+                title: Ист. Бел.
+                schedule:
+                  startH: 14
+                  startM: 55
+                  endH: 15
+                  endM: 40
+                classID: 26522
+            WEDNESDAY:
+              - place: 5
+                title: Ист. Бел.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26521
+              - place: 6
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 55
+                  endH: 14
+                  endM: 40
+                classID: 24264
+              - place: 7
+                title: Всемир. ист.
+                schedule:
+                  startH: 14
+                  startM: 55
+                  endH: 15
+                  endM: 40
+                classID: 24268
+            THURSDAY:
+              - place: 0
+                title: Информ. час
+                schedule:
+                  startH: 8
+                  startM: 30
+                  endH: 8
+                  endM: 55
+                classID: 26517
+              - place: 2
+                title: Всемир. ист.
+                schedule:
+                  startH: 10
+                  startM: 0
+                  endH: 10
+                  endM: 45
+                classID: 26519
+              - place: 3
+                title: Всемир. ист.
+                schedule:
+                  startH: 11
+                  startM: 0
+                  endH: 11
+                  endM: 45
+                classID: 26520
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26522
+              - place: 6
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 55
+                  endH: 14
+                  endM: 40
+                classID: 26521
+            FRIDAY:
+              - place: 1
+                title: Всемир. ист.
+                schedule:
+                  startH: 9
+                  startM: 0
+                  endH: 9
+                  endM: 45
+                classID: 26517
+              - place: 2
+                title: Всемир. ист.
+                schedule:
+                  startH: 10
+                  startM: 0
+                  endH: 10
+                  endM: 45
+                classID: 26216
+              - place: 3
+                title: Всемир. ист.
+                schedule:
+                  startH: 11
+                  startM: 0
+                  endH: 11
+                  endM: 45
+                classID: 26518
+              - place: 4
+                title: Всемир. ист.
+                schedule:
+                  startH: 12
+                  startM: 0
+                  endH: 12
+                  endM: 45
+                classID: 26516
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+              - place: 6
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 55
+                  endH: 14
+                  endM: 40
+                classID: 24267
+            SATURDAY: []
+          second: null
+      examples:
+        - MONDAY:
+            first:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+            second:
+              - place: 2
+                title: Всемир. ист.
+                schedule:
+                  startH: 16
+                  startM: 0
+                  endH: 16
+                  endM: 45
+                classID: 26215
+          TUESDAY:
+            first:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+            second:
+              - place: 2
+                title: Всемир. ист.
+                schedule:
+                  startH: 16
+                  startM: 0
+                  endH: 16
+                  endM: 45
+                classID: 26215
+          WEDNESDAY:
+            first:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+            second:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+          THURSDAY:
+            first:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+            second:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+          FRIDAY:
+            first:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+            second:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+          SATURDAY:
+            first:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+            second:
+              - place: 5
+                title: Всемир. ист.
+                schedule:
+                  startH: 13
+                  startM: 0
+                  endH: 13
+                  endM: 45
+                classID: 26215
+      title: Timetable
+      properties:
+        MONDAY:
+          type: object
+          properties:
+            first:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+            second:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+        TUESDAY:
+          type: object
+          properties:
+            first:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+            second:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+        WEDNESDAY:
+          type: object
+          properties:
+            first:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+            second:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+        THURSDAY:
+          type: object
+          properties:
+            first:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+            second:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+        FRIDAY:
+          type: object
+          properties:
+            first:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+            second:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+        SATURDAY:
+          type: object
+          properties:
+            first:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+            second:
+              type:
+                - array
+                - 'null'
+              items:
+                $ref: '#/components/schemas/Lesson-data'
+      required:
+        - MONDAY
+        - TUESDAY
+        - WEDNESDAY
+        - THURSDAY
+        - FRIDAY
+        - SATURDAY
+    Lesson-data:
+      description: Describes lesson.
+      type: object
+      x-examples:
+        example-1:
+          place: 5
+          title: Всемир. ист.
+          schedule:
+            startH: 13
+            startM: 0
+            endH: 13
+            endM: 45
+          classID: 26215
+      examples:
+        - place: 5
+          title: Всемир. ист.
+          schedule:
+            startH: 13
+            startM: 0
+            endH: 13
+            endM: 45
+          classID: 26215
+        - place: 2
+          title: Информ.
+          schedule:
+            startH: 16
+            startM: 0
+            endH: 16
+            endM: 45
+          classID: 26215
+      title: Lesson data
+      properties:
+        place:
+          type: integer
+        title:
+          type: string
+          minLength: 1
+        classID:
+          type: number
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+      required:
+        - place
+        - title
+        - classID
+        - schedule
+    Error:
+      title: Error
+      type: object
+      properties:
+        errorCode:
+          type: string
+        additionalInfo:
+          type:
+            - string
+            - 'null'
+      examples:
+        - errorCode: USER_NOT_FOUND
+          additionalInfo: User with ID 69420 was not found
+        - errorCode: SCHOOLS_BY_UNAVAILABLE
+          additionalInfo: 'Schools.by is unavailable, so server cannot process this request'
+        - errorCode: NO_TOKEN
+          additionalInfo: No valid token were supplied
+      description: Describes error to client
+    Schedule:
+      description: ''
+      type: object
+      properties:
+        startH:
+          type: number
+        startM:
+          type: number
+        endH:
+          type: number
+        endM:
+          type: number
+      required:
+        - startH
+        - startM
+        - endH
+        - endM
+      x-examples:
+        example-1:
+          startH: 13
+          startM: 0
+          endH: 13
+          endM: 45
+    Class:
+      title: Class
+      type: object
+      description: Defines most basic class data
+      examples:
+        - id: 133769
+          title: 1 "А"
+          isSecondShift: false
+          pupilCount: 31
+          classTeacherId: 69420
+          classTeacherName: Стэтхэм Джейсон Альбертович
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        isSecondShift:
+          type: boolean
+        pupilCount:
+          type: integer
+        classTeacherId:
+          type: integer
+        classTeacherName:
+          type: string
+      required:
+        - id
+        - title
+        - isSecondShift
+        - pupilCount
+        - classTeacherId
+        - classTeacherName
+    Absence:
+      title: Absence
+      type: object
+      description: Describes absence info
+      examples:
+        - pupilId: 0
+          classId: 0
+          date: '2019-08-24'
+          reason: ILLNESS
+          lessonsList:
+            - 0
+      properties:
+        pupilId:
+          type: integer
+        classId:
+          type: integer
+        date:
+          $ref: '#/components/schemas/Date'
+        reason:
+          $ref: '#/components/schemas/Absence-reason'
+        lessonsList:
+          type: array
+          items:
+            type: integer
+      required:
+        - pupilId
+        - classId
+        - date
+        - reason
+        - lessonsList
+    Absence-reason:
+      type: string
+      title: Absence-reason
+      enum:
+        - ILLNESS
+        - HEALING
+        - REQUEST
+        - COMPETITION
+        - UNKNOWN
+      examples:
+        - ILLNESS
+      description: Reason of pupil's absence
+    Date:
+      type: string
+      title: Date
+      description: Date
+      pattern: '([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))'
+      format: date
+      examples:
+        - '2019-08-24'
+    User-Type:
+      type: string
+      title: User-Type
+      enum:
+        - PUPIL
+        - PARENT
+        - TEACHER
+        - SYSTEM
+        - ADMINISTRATION
+      examples:
+        - PUPIL
+      description: ''
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+  responses:
+    Unauthorized:
+      description: Supplied token was not approved by server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            No token were supplied:
+              value:
+                errorCode: NO_TOKEN
+                additionalInfo: No valid token were supplied
+            Token was invalidated:
+              value:
+                errorCode: TOKEN_INVALIDATED
+                additionalInfo: USER_REQUEST
+    User-not-found:
+      description: User is not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            User not found:
+              value:
+                errorCode: USER_NOT_FOUND
+                additionalInfo: User with ID 69420 was not found
+            Class not found:
+              value:
+                errorCode: CLASS_NOT_FOUND
+                additionalInfo: Class with ID 69420 was not found
+    Class-not-found:
+      description: Class not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            Class not found:
+              value:
+                errorCode: CLASS_NOT_FOUND
+                additionalInfo: Class with ID 69420 was not found
+  requestBodies:
+    Absence-post-data:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Absence'
+  examples: {}
+  parameters:
+    userId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: -1
+      description: ID of user. (-1) evaluates to "Current user"
+    classId:
+      name: classId
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Class ID
+security:
+  - JWT: []

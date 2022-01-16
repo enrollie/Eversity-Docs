@@ -3,10 +3,10 @@ Using [hugo](https://gohugo.io) as site generator
 
 Build:
 ``` bash
-hugo
+cd website && hugo
 ```
 
 Run locally:
 ``` bash
-hugo server
+cd website && hugo server
 ```

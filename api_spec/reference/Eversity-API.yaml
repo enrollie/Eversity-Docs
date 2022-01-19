@@ -347,23 +347,32 @@ paths:
                   type: string
   '/class/{classId}':
     parameters:
-      - name: classId
-        in: path
-        required: true
-        schema:
-          type: integer
-        description: Class ID
+      - $ref: '#/components/parameters/classId'
     get:
       summary: Your GET endpoint
       tags: []
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+              examples:
+                Example:
+                  value:
+                    id: 133769
+                    title: 1 "А"
+                    isSecondShift: false
+                    pupilCount: 31
+                    classTeacherId: 69420
+                    classTeacherName: Стэтхэм Джейсон Альбертович
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/Class-not-found'
       operationId: get-classes-classId
+      description: Returns class data
   '/class/{classId}/absence':
     parameters:
       - name: classId
@@ -384,6 +393,7 @@ paths:
                 type: array
                 items:
                   type: object
+                  description: 'Pair of (Pupil, absenceList)'
                   properties:
                     pupil:
                       $ref: '#/components/schemas/User'
@@ -391,12 +401,29 @@ paths:
                       type: array
                       items:
                         $ref: '#/components/schemas/Absence'
+              examples:
+                example-1:
+                  value:
+                    - pupil:
+                        id: 124
+                        type: PUPIL
+                        firstName: Степан
+                        middleName: Андреевич
+                        lastName: Стэтхем
+                        classID: null
+                      absences:
+                        - pupilId: 0
+                          classId: 0
+                          date: '2019-08-24'
+                          reason: ILLNESS
+                          lessonsList:
+                            - 0
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/Class-not-found'
       operationId: get-classes-classId-absence
-      description: Gets absences summary for range of given dates (defaults to current week)
+      description: Gets absences summary for range of given dates (defaults to request date week)
       parameters:
         - schema:
             type: string
@@ -424,7 +451,10 @@ paths:
           $ref: '#/components/responses/Class-not-found'
       requestBody:
         $ref: '#/components/requestBodies/Absence-post-data'
-      description: 'Send absence data. Please, see docs/absence.md for absence accounting process'
+      description: |-
+        Send absence data. Please, see docs/absence.md for absence accounting process.
+
+        **Note:** on absence data POST field 'sentBy' will be ignored by the server.
   '/class/{classId}/absence/{date}':
     parameters:
       - $ref: '#/components/parameters/classId'
@@ -1288,6 +1318,10 @@ components:
           type: integer
         classId:
           type: integer
+        sentBy:
+          type:
+            - integer
+            - 'null'
         date:
           $ref: '#/components/schemas/Date'
         reason:
@@ -1296,6 +1330,11 @@ components:
           type: array
           items:
             type: integer
+        note:
+          oneOf:
+            - type: 'null'
+              properties: {}
+            - $ref: '#/components/schemas/Absence-note'
       required:
         - pupilId
         - classId
@@ -1334,6 +1373,35 @@ components:
       examples:
         - PUPIL
       description: ''
+    Absence-note:
+      title: Absence-note
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - TextAbsenceNote
+            - DataAbsenceNote
+        note:
+          oneOf:
+            - $ref: '#/components/schemas/Text-Absence-Note'
+    Text-Absence-Note:
+      title: Text-Absence-Note
+      type: object
+      description: 'Absence note, containing only custom message'
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    Additional-Data-Absence-Note:
+      title: Additional-Data-Absence-Note
+      type: object
+      properties:
+        didLeaveAftermath:
+          type:
+            - boolean
+            - 'null'
   securitySchemes:
     JWT:
       type: http
@@ -1386,6 +1454,7 @@ components:
         application/json:
           schema:
             type: array
+            description: 'Note, that field ''sentBy'' will be ignored by server on POST'
             items:
               $ref: '#/components/schemas/Absence'
   examples: {}

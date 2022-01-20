@@ -80,10 +80,13 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
       description: 'Invalidates token, supplied with the request (effectievly signs user out)'
+      tags:
+        - Auth
   '/auth/{userId}/tokens':
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Auth
       responses:
         '200':
           description: OK
@@ -124,6 +127,8 @@ paths:
           $ref: '#/components/responses/User-not-found'
       description: Invalidates user's tokens
       parameters: []
+      tags:
+        - Auth
   '/user/{userId}':
     parameters:
       - name: userId
@@ -135,7 +140,8 @@ paths:
         description: ID of user. (-1) evaluates to "Current user"
     get:
       summary: Get User Info by User ID
-      tags: []
+      tags:
+        - User
       responses:
         '200':
           description: User Found
@@ -168,7 +174,8 @@ paths:
         description: ID of user. (-1) evaluates to "Current user"
     get:
       summary: Get user timetable
-      tags: []
+      tags:
+        - User
       responses:
         '200':
           description: OK
@@ -194,7 +201,8 @@ paths:
         description: ID of user. (-1) evaluates to "Current user"
     get:
       summary: Get user timetable for request date
-      tags: []
+      tags:
+        - User
       responses:
         '200':
           description: OK
@@ -233,7 +241,8 @@ paths:
         description: ID of user. (-1) evaluates to "Current user"
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - User
       responses:
         '200':
           description: OK
@@ -272,7 +281,8 @@ paths:
       - $ref: '#/components/parameters/userId'
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - User
       responses:
         '200':
           description: OK
@@ -333,6 +343,8 @@ paths:
                 integrationId:
                   type: string
         description: Creates new integration
+      tags:
+        - User
     delete:
       summary: ''
       operationId: delete-user-userId-integrations
@@ -352,12 +364,15 @@ paths:
               properties:
                 integrationId:
                   type: string
+      tags:
+        - User
   '/class/{classId}':
     parameters:
       - $ref: '#/components/parameters/classId'
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Class
       responses:
         '200':
           description: OK
@@ -390,7 +405,6 @@ paths:
         description: Class ID
     get:
       summary: Your GET endpoint
-      tags: []
       responses:
         '200':
           description: OK
@@ -448,6 +462,9 @@ paths:
           name: endDate
           description: Range end date in YYYY-MM-dd format
           style: form
+      tags:
+        - Class
+        - Absence
     post:
       summary: Send absence data
       operationId: post-class-classId-absence
@@ -467,26 +484,24 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/Absence'
+              writeOnly: true
             examples:
               example-1:
                 value:
-                  - pupilId: 0
+                  - pupilId: 219275
                     date: '2019-08-24'
                     reason: ILLNESS
                     lessonsList:
                       - 0
-                      - 1
-                      - 2
-                      - 3
-                      - 4
-                      - 5
-                      - 6
-                      - 7
                     note:
                       type: ADDITIONAL_DATA
                       note:
-                        didLeaveAftermath: true
+                        type: ADDITIONAL_DATA
+                        didLeaveAftermath: false
         description: ''
+      tags:
+        - Absence
+        - Class
   '/class/{classId}/absence/{date}':
     parameters:
       - $ref: '#/components/parameters/classId'
@@ -498,7 +513,9 @@ paths:
         required: true
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Absence
+        - Class
       responses:
         '200':
           description: OK
@@ -521,7 +538,8 @@ paths:
         required: true
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Class
       responses:
         '200':
           description: OK
@@ -538,7 +556,8 @@ paths:
       - $ref: '#/components/parameters/classId'
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Class
       responses:
         '200':
           description: OK
@@ -558,27 +577,25 @@ paths:
         required: true
     get:
       summary: Your GET endpoint
-      tags: []
-      responses: {}
+      tags:
+        - Class
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  first:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Lesson-data'
+                  second:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Lesson-data'
       operationId: get-class-classId-timetable-today
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                first:
-                  type:
-                    - array
-                    - 'null'
-                  items:
-                    $ref: '#/components/schemas/Lesson-data'
-                second:
-                  type:
-                    - array
-                    - 'null'
-                  items:
-                    $ref: '#/components/schemas/Lesson-data'
       description: Returns timetable for request date (counted from server's timezone)
   '/class/{classId}/timetable/today/current':
     parameters:
@@ -589,17 +606,24 @@ paths:
         required: true
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Class
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Lesson-data'
-                  - type: 'null'
-                    properties: {}
+                type: object
+                properties:
+                  serverTime:
+                    type: string
+                    format: date-time
+                  lesson:
+                    oneOf:
+                      - $ref: '#/components/schemas/Lesson-data'
+                      - type: 'null'
+                        properties: {}
               examples: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -610,7 +634,8 @@ paths:
   /absence/statistics:
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Absence
       responses:
         '200':
           description: OK
@@ -715,7 +740,8 @@ paths:
   /absence/statistics/extended:
     get:
       summary: Your GET endpoint
-      tags: []
+      tags:
+        - Absence
       responses:
         '200':
           description: OK
@@ -787,10 +813,12 @@ components:
         lastName:
           type: string
           minLength: 1
-        classID:
+        classId:
           type:
-            - number
+            - integer
             - 'null'
+          description: May be absent from some outputs of server
+          readOnly: true
       required:
         - id
         - type
@@ -1431,6 +1459,7 @@ components:
       examples:
         - PUPIL
       description: ''
+      readOnly: true
     Absence-note:
       title: Absence-note
       type: object
@@ -1463,6 +1492,11 @@ components:
       type: object
       description: 'Absence note, containing only custom message'
       properties:
+        type:
+          type: string
+          enum:
+            - TEXT
+          pattern: TYPE
         message:
           type: string
       required:
@@ -1472,11 +1506,19 @@ components:
       type: object
       description: Additional data regarding pupil absence
       properties:
+        type:
+          type: string
+          enum:
+            - ADDITIONAL_DATA
+          pattern: ADDITIONAL_DATA
         didLeaveAftermath:
           type:
             - boolean
             - 'null'
           default: null
+      examples:
+        - type: ADDITIONAL_DATA
+          didLeaveAftermath: null
   securitySchemes:
     JWT:
       type: http
@@ -1543,3 +1585,5 @@ components:
       description: Class ID
 security:
   - JWT: []
+tags:
+  - name: User

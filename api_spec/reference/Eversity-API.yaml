@@ -10,7 +10,8 @@ info:
   contact:
     url: 'https://github.com/enrollie/Eversity-Server'
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'http://localhost:8081'
+    description: Local test server
 paths:
   /auth/login:
     post:
@@ -282,12 +283,18 @@ paths:
                 items:
                   type: object
                   properties:
-                    integrationID:
+                    integrationId:
                       type: string
                     publicName:
                       type: string
                     connected:
                       type: boolean
+              examples:
+                example-1:
+                  value:
+                    - integrationId: Telegram-912
+                      publicName: Telegram Parent integration
+                      connected: true
         '201':
           $ref: '#/components/responses/User-not-found'
         '404':
@@ -323,7 +330,7 @@ paths:
             schema:
               type: object
               properties:
-                integrationID:
+                integrationId:
                   type: string
         description: Creates new integration
     delete:
@@ -343,7 +350,7 @@ paths:
             schema:
               type: object
               properties:
-                integrationID:
+                integrationId:
                   type: string
   '/class/{classId}':
     parameters:
@@ -430,7 +437,7 @@ paths:
             format: date
             pattern: '([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))'
           in: query
-          name: beginDate
+          name: startDate
           allowEmptyValue: true
           description: Range begin date in YYYY-MM-dd format
           style: form
@@ -449,12 +456,37 @@ paths:
           description: OK
         '404':
           $ref: '#/components/responses/Class-not-found'
-      requestBody:
-        $ref: '#/components/requestBodies/Absence-post-data'
       description: |-
         Send absence data. Please, see docs/absence.md for absence accounting process.
 
         **Note:** on absence data POST field 'sentBy' will be ignored by the server.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Absence'
+            examples:
+              example-1:
+                value:
+                  - pupilId: 0
+                    date: '2019-08-24'
+                    reason: ILLNESS
+                    lessonsList:
+                      - 0
+                      - 1
+                      - 2
+                      - 3
+                      - 4
+                      - 5
+                      - 6
+                      - 7
+                    note:
+                      type: ADDITIONAL_DATA
+                      note:
+                        didLeaveAftermath: true
+        description: ''
   '/class/{classId}/absence/{date}':
     parameters:
       - $ref: '#/components/parameters/classId'
@@ -490,7 +522,15 @@ paths:
     get:
       summary: Your GET endpoint
       tags: []
-      responses: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
       operationId: get-class-classId-pupils
       description: Returns class pupils list
   '/class/{classId}/timetable':
@@ -1307,23 +1347,40 @@ components:
       type: object
       description: Describes absence info
       examples:
-        - pupilId: 0
-          classId: 0
+        - pupilId: 219275
+          classId: 26216
+          sentBy: 111
           date: '2019-08-24'
           reason: ILLNESS
           lessonsList:
             - 0
+          note: null
+        - pupilId: 219275
+          classId: 26216
+          sentBy: 111
+          date: '2019-08-24'
+          reason: ILLNESS
+          lessonsList:
+            - 0
+          note:
+            type: TextAbsenceNite
+            note:
+              message: uwu
       properties:
         pupilId:
           type: integer
         classId:
           type: integer
+          readOnly: true
         sentBy:
           type:
             - integer
             - 'null'
+          readOnly: true
         date:
-          $ref: '#/components/schemas/Date'
+          type: string
+          format: date
+          description: Cannot be Sunday due to internal descisions
         reason:
           $ref: '#/components/schemas/Absence-reason'
         lessonsList:
@@ -1332,15 +1389,15 @@ components:
             type: integer
         note:
           oneOf:
-            - type: 'null'
-              properties: {}
             - $ref: '#/components/schemas/Absence-note'
+            - type: 'null'
+            - {}
       required:
         - pupilId
-        - classId
         - date
         - reason
         - lessonsList
+        - note
     Absence-reason:
       type: string
       title: Absence-reason
@@ -1350,6 +1407,7 @@ components:
         - REQUEST
         - COMPETITION
         - UNKNOWN
+        - DUMMY
       examples:
         - ILLNESS
       description: Reason of pupil's absence
@@ -1376,15 +1434,30 @@ components:
     Absence-note:
       title: Absence-note
       type: object
+      description: Additional data used to make some details about student absence clearer
+      examples:
+        - type: TEXT
+          note:
+            message: Left because of sick in stomach
+        - type: TEXT
+          note:
+            message: PLS ask on the next lesson
+        - type: ADDITIONAL_DATA
+          note:
+            leftAftermath: true
       properties:
         type:
           type: string
           enum:
-            - TextAbsenceNote
-            - DataAbsenceNote
+            - TEXT
+            - ADDITIONAL_DATA
         note:
           oneOf:
             - $ref: '#/components/schemas/Text-Absence-Note'
+            - $ref: '#/components/schemas/Additional-Data-Absence-Note'
+      required:
+        - type
+        - note
     Text-Absence-Note:
       title: Text-Absence-Note
       type: object
@@ -1397,11 +1470,13 @@ components:
     Additional-Data-Absence-Note:
       title: Additional-Data-Absence-Note
       type: object
+      description: Additional data regarding pupil absence
       properties:
         didLeaveAftermath:
           type:
             - boolean
             - 'null'
+          default: null
   securitySchemes:
     JWT:
       type: http
@@ -1448,15 +1523,7 @@ components:
               value:
                 errorCode: CLASS_NOT_FOUND
                 additionalInfo: Class with ID 69420 was not found
-  requestBodies:
-    Absence-post-data:
-      content:
-        application/json:
-          schema:
-            type: array
-            description: 'Note, that field ''sentBy'' will be ignored by server on POST'
-            items:
-              $ref: '#/components/schemas/Absence'
+  requestBodies: {}
   examples: {}
   parameters:
     userId:

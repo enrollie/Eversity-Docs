@@ -15,7 +15,7 @@ servers:
 paths:
   /auth/login:
     post:
-      summary: ''
+      summary: Log user in
       operationId: post-auth-login
       responses:
         '200':
@@ -59,7 +59,7 @@ paths:
   /auth/tokens:
     parameters: []
     delete:
-      summary: ''
+      summary: Invalidate all login tokens for current user
       operationId: delete-auth-tokens
       description: Invalidates all tokens (including one supplied with the request)
       responses:
@@ -72,7 +72,7 @@ paths:
   /auth/tokens/current:
     parameters: []
     delete:
-      summary: ''
+      summary: Invalidate current login token for current user
       operationId: delete-auth-tokens-current
       responses:
         '200':
@@ -84,7 +84,7 @@ paths:
         - Auth
   '/auth/{userId}/tokens':
     get:
-      summary: Your GET endpoint
+      summary: Get count of user's issued login tokens
       tags:
         - Auth
       responses:
@@ -116,7 +116,7 @@ paths:
           minimum: -1
         description: ID of user. (-1) evaluates to "Current user"
     delete:
-      summary: ''
+      summary: Invalidate all user's login tokens
       operationId: delete-auth-userId-tokens
       responses:
         '200':
@@ -240,7 +240,7 @@ paths:
           minimum: -1
         description: ID of user. (-1) evaluates to "Current user"
     get:
-      summary: Your GET endpoint
+      summary: Get user's current lesson
       tags:
         - User
       responses:
@@ -280,7 +280,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/userId'
     get:
-      summary: Your GET endpoint
+      summary: Get all user integrations
       tags:
         - User
       responses:
@@ -312,7 +312,7 @@ paths:
       operationId: get-users-userId-integrations
       description: 'Returns all user integrations with other services (i.e. Telegram), including not connected, but available'
     put:
-      summary: ''
+      summary: Add new user integration
       operationId: put-user-userId-integrations
       responses:
         '200':
@@ -346,7 +346,7 @@ paths:
       tags:
         - User
     delete:
-      summary: ''
+      summary: Delete user integration
       operationId: delete-user-userId-integrations
       responses:
         '202':
@@ -370,7 +370,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/classId'
     get:
-      summary: Your GET endpoint
+      summary: Get class data by ID
       tags:
         - Class
       responses:
@@ -404,7 +404,7 @@ paths:
           type: integer
         description: Class ID
     get:
-      summary: Your GET endpoint
+      summary: Get class's absence
       responses:
         '200':
           description: OK
@@ -512,7 +512,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get absence data for specific date
       tags:
         - Absence
         - Class
@@ -537,7 +537,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get list of pupils in class
       tags:
         - Class
       responses:
@@ -555,7 +555,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/classId'
     get:
-      summary: Your GET endpoint
+      summary: Get class's timetable
       tags:
         - Class
       responses:
@@ -576,7 +576,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get class's timetable for request date
       tags:
         - Class
       responses:
@@ -605,7 +605,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get current class's lesson
       tags:
         - Class
       responses:
@@ -631,9 +631,33 @@ paths:
           $ref: '#/components/responses/Class-not-found'
       operationId: get-class-classId-timetable-today-current
       description: Returns current lesson (based on server's timezone)
+  /absence/noData:
+    get:
+      summary: Get list of classes without absence data
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Class'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: get-absence-noData
+      description: 'Returns list of classes, that did not send absence data by time of the request'
+      parameters:
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: date
+          description: Return response for given date
   /absence/statistics:
     get:
-      summary: Your GET endpoint
+      summary: Get school-wide absence statistics
       tags:
         - Absence
       responses:
@@ -735,11 +759,20 @@ paths:
                         REQUEST: 0
                         COMPETITION: 0
                         UNKNOWN: 0
+        '401':
+          $ref: '#/components/responses/Unauthorized'
       operationId: get-absence-statistics
       description: Returns current whole school absence statistics summary by shifts and by reasons.
-  /absence/statistics/extended:
+      parameters:
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: date
+          description: Return absence data for given date
+  /absence/statistics/detailed:
     get:
-      summary: Your GET endpoint
+      summary: Get detailed absence data
       tags:
         - Absence
       responses:
@@ -752,6 +785,8 @@ paths:
                 items:
                   type: object
                   properties:
+                    id:
+                      type: string
                     firstName:
                       type: string
                     middleName:
@@ -762,10 +797,19 @@ paths:
                       type: string
                     absenceReason:
                       $ref: '#/components/schemas/Absence-reason'
-                    classID:
+                    classId:
                       type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
       operationId: get-absence-statistics-extended
-      description: Returns extended absence statistics with data on every absent pupil
+      description: Returns detailed absence statistics with data on every absent pupil
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: date
+          description: Return data for given date
+    parameters: []
 components:
   schemas:
     User:
@@ -1314,7 +1358,7 @@ components:
         - errorCode: SCHOOLS_BY_UNAVAILABLE
           additionalInfo: 'Schools.by is unavailable, so server cannot process this request'
         - errorCode: NO_TOKEN
-          additionalInfo: No valid token were supplied
+          additionalInfo: No valid token was supplied
       description: Describes error to client
     Schedule:
       description: ''
@@ -1339,6 +1383,7 @@ components:
           startM: 0
           endH: 13
           endM: 45
+      title: Schedule
     Class:
       title: Class
       type: object
@@ -1382,14 +1427,6 @@ components:
           reason: ILLNESS
           lessonsList:
             - 0
-          note: null
-        - pupilId: 219275
-          classId: 26216
-          sentBy: 111
-          date: '2019-08-24'
-          reason: ILLNESS
-          lessonsList:
-            - 0
           note:
             type: TextAbsenceNite
             note:
@@ -1415,6 +1452,12 @@ components:
           type: array
           items:
             type: integer
+        lastEditTimestamp:
+          type: integer
+          format: int64
+          minimum: 0
+          example: Timestamp of last data edit
+          readOnly: true
         note:
           oneOf:
             - $ref: '#/components/schemas/Absence-note'

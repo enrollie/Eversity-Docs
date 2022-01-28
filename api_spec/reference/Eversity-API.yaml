@@ -810,6 +810,22 @@ paths:
           name: date
           description: Return data for given date
     parameters: []
+  /absence/statistics/template:
+    get:
+      summary: Generate filled absence statistics template
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                Download link for a generated template:
+                  value: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+      operationId: get-absence-statistics-template
+      description: Returns URL of temp file that contains filled template. Valid for ~20 seconds.
 components:
   schemas:
     User:

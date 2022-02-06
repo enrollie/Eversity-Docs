@@ -163,6 +163,37 @@ paths:
           $ref: '#/components/responses/User-not-found'
       operationId: get-users-userId
       description: Retrieve the information of the user with the matching user ID.
+  '/users/{userId}/class':
+    parameters:
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    get:
+      summary: Get user's class if present
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  class:
+                    oneOf:
+                      - $ref: '#/components/schemas/Class'
+                      - type: 'null'
+                        properties: {}
+                  role:
+                    type:
+                      - string
+                      - 'null'
+        '404':
+          $ref: '#/components/responses/User-not-found'
+      operationId: get-users-userId-class
+      description: 'If user persistently belongs to class (doesn''t matter: Pupil or class teacher) will respond with user''s class'
   '/user/{userId}/timetable':
     parameters:
       - name: userId
@@ -356,16 +387,15 @@ paths:
         '404':
           $ref: '#/components/responses/User-not-found'
       description: Deletes an integration from user account
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                integrationId:
-                  type: string
       tags:
         - User
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: integrationId
+          description: ID of integration to delete
+          required: true
   '/class/{classId}':
     parameters:
       - $ref: '#/components/parameters/classId'
@@ -810,22 +840,115 @@ paths:
           name: date
           description: Return data for given date
     parameters: []
-  /absence/statistics/template:
+  /templating/generate:
     get:
-      summary: Generate filled absence statistics template
+      summary: Generate template and fill it with data
       tags: []
       responses:
         '200':
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  validFor:
+                    type: integer
+                    description: 'Represents how long will generated document will stay available on server, in seconds'
+                  downloadLink:
+                    type: string
+                    format: uri
+                    description: Download link for newly-generated document
+                  title:
+                    type: string
+                    description: 'Represents document''s real title, not garbage in link'
               examples:
-                Download link for a generated template:
-                  value: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-      operationId: get-absence-statistics-template
-      description: Returns URL of temp file that contains filled template. Valid for ~20 seconds.
+                Example:
+                  value:
+                    validFor: 20
+                    downloadLink: 'https://example.com/ihjnduwer234isertdfslfs9o3rji23dkfsk8svi28392skksdfsr.docx'
+                    title: Eversity Statistics for 2022-01-01.docx
+      operationId: get-templating-generate
+      description: Populates requested template with data
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - schoolAbsenceReport
+              - classAbsenceReport
+          in: query
+          name: type
+          required: true
+          description: Defines what query parameters are needed and what query parameters are needed
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: date
+          description: Represents date to get data for. Required for schoolWideAbsence
+        - schema:
+            type: string
+          in: query
+          name: firstDate
+          description: 'Represents first date from range of [firstDate. lastDate] to date be gotten for. Needed for classAbsenceReport'
+        - schema:
+            type: string
+          in: query
+          name: lastDate
+          description: 'Represents last date from range of [firstDate. lastDate] to date be gotten for. Needed for classAbsenceReport'
+        - schema:
+            type: string
+          in: query
+          name: classId
+          description: Represents class ID for data to be gotten for. Required for classAbsenceReport
+  /school:
+    get:
+      summary: Returns data about school
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  serverVersion:
+                    type: string
+                  localTime:
+                    type: string
+                    format: date-time
+                  schoolWebsite:
+                    type: string
+                    format: uri
+                  statistics:
+                    type: object
+                    properties:
+                      usersCount:
+                        type: integer
+                      classesCount:
+                        type: integer
+      operationId: get-school
+      description: Returns basic data about school
+      security: []
+  /school/classes:
+    get:
+      summary: Get list of classes
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Class'
+              examples: {}
+      operationId: get-school-classes
+      description: 'Returns list of classes, registered in school'
 components:
   schemas:
     User:

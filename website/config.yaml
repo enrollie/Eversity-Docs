@@ -1,4 +1,4 @@
-baseURL: "Eversity-Docs/"
+baseURL: "https://enrollie.github.io/Eversity-Docs/"
 title: "Eversity"
 paginate: 5
 theme: PaperMod

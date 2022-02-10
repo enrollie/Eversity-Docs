@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Eversity</title>
+    <link>/ru/</link>
+    <description>Recent content on Eversity</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sun, 16 Jan 2022 19:28:59 +0300</lastBuildDate><atom:link href="/ru/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Установка сервера</title>
+      <link>/ru/posts/installation/</link>
+      <pubDate>Sun, 16 Jan 2022 19:28:59 +0300</pubDate>
+      
+      <guid>/ru/posts/installation/</guid>
+      <description>Установка сервера Eversity достаточно проста.
+Вам потребуется:
+ Школа (или любое другое учебное завделение), подключенное к платформе Schools.by Сервер, поддерживающий OpenJDK 16 (в этой инструкции все шаги были воспроизведены на VPS с установленной Ubuntu 20.04, 1 ГБ ОЗУ, 1 ядро) ~2 ГБ интернет-трафика ~40 минут времени  У вас всё это есть? Отлично, приступим.
+Установка Примечание: все шаги в этой инструкции сделаны для повторения на системе Ubuntu, но для остальных ОС процесс примерно похож</description>
+    </item>
+    
+  </channel>
+</rss>

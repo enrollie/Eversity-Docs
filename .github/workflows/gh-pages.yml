@@ -21,6 +21,10 @@ jobs:
           hugo-version: 'latest'
           # extended: true
 
+      - name: CD into website dir
+        run: cd website
+
+
       - name: Build
         run: hugo --minify
 

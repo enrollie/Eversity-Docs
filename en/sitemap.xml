@@ -2,82 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>Eversity-Docs/</loc>
+    <loc>https://enrollie.github.io/Eversity-Docs/</loc>
     <lastmod>2022-01-16T16:36:40+03:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="Eversity-Docs/ru/"
+                href="https://enrollie.github.io/Eversity-Docs/ru/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="Eversity-Docs/"
+                href="https://enrollie.github.io/Eversity-Docs/"
                 />
   </url><url>
-    <loc>Eversity-Docs/posts/</loc>
+    <loc>https://enrollie.github.io/Eversity-Docs/posts/</loc>
     <lastmod>2022-01-16T16:36:40+03:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="Eversity-Docs/ru/posts/"
+                href="https://enrollie.github.io/Eversity-Docs/ru/posts/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="Eversity-Docs/posts/"
+                href="https://enrollie.github.io/Eversity-Docs/posts/"
                 />
   </url><url>
-    <loc>Eversity-Docs/posts/installation/</loc>
+    <loc>https://enrollie.github.io/Eversity-Docs/posts/installation/</loc>
     <lastmod>2022-01-16T16:36:40+03:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="Eversity-Docs/ru/posts/installation/"
+                href="https://enrollie.github.io/Eversity-Docs/ru/posts/installation/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="Eversity-Docs/posts/installation/"
+                href="https://enrollie.github.io/Eversity-Docs/posts/installation/"
                 />
   </url><url>
-    <loc>Eversity-Docs/archives/</loc>
+    <loc>https://enrollie.github.io/Eversity-Docs/archives/</loc>
     <lastmod>2022-01-16T16:20:06+03:00</lastmod>
   </url><url>
-    <loc>Eversity-Docs/categories/</loc>
+    <loc>https://enrollie.github.io/Eversity-Docs/categories/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="Eversity-Docs/ru/categories/"
+                href="https://enrollie.github.io/Eversity-Docs/ru/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="Eversity-Docs/categories/"
+                href="https://enrollie.github.io/Eversity-Docs/categories/"
                 />
   </url><url>
-    <loc>Eversity-Docs/series/</loc>
+    <loc>https://enrollie.github.io/Eversity-Docs/series/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="Eversity-Docs/ru/series/"
+                href="https://enrollie.github.io/Eversity-Docs/ru/series/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="Eversity-Docs/series/"
+                href="https://enrollie.github.io/Eversity-Docs/series/"
                 />
   </url><url>
-    <loc>Eversity-Docs/tags/</loc>
+    <loc>https://enrollie.github.io/Eversity-Docs/tags/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="Eversity-Docs/ru/tags/"
+                href="https://enrollie.github.io/Eversity-Docs/ru/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="Eversity-Docs/tags/"
+                href="https://enrollie.github.io/Eversity-Docs/tags/"
                 />
   </url>
 </urlset>

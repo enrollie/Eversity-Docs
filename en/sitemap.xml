@@ -2,82 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/</loc>
+    <loc>Eversity-Docs/</loc>
     <lastmod>2022-01-16T16:36:40+03:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="/ru/"
+                href="Eversity-Docs/ru/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/"
+                href="Eversity-Docs/"
                 />
   </url><url>
-    <loc>/posts/</loc>
+    <loc>Eversity-Docs/posts/</loc>
     <lastmod>2022-01-16T16:36:40+03:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="/ru/posts/"
+                href="Eversity-Docs/ru/posts/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/posts/"
+                href="Eversity-Docs/posts/"
                 />
   </url><url>
-    <loc>/posts/installation/</loc>
+    <loc>Eversity-Docs/posts/installation/</loc>
     <lastmod>2022-01-16T16:36:40+03:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="/ru/posts/installation/"
+                href="Eversity-Docs/ru/posts/installation/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/posts/installation/"
+                href="Eversity-Docs/posts/installation/"
                 />
   </url><url>
-    <loc>/archives/</loc>
+    <loc>Eversity-Docs/archives/</loc>
     <lastmod>2022-01-16T16:20:06+03:00</lastmod>
   </url><url>
-    <loc>/categories/</loc>
+    <loc>Eversity-Docs/categories/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="/ru/categories/"
+                href="Eversity-Docs/ru/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/categories/"
+                href="Eversity-Docs/categories/"
                 />
   </url><url>
-    <loc>/series/</loc>
+    <loc>Eversity-Docs/series/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="/ru/series/"
+                href="Eversity-Docs/ru/series/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/series/"
+                href="Eversity-Docs/series/"
                 />
   </url><url>
-    <loc>/tags/</loc>
+    <loc>Eversity-Docs/tags/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="ru"
-                href="/ru/tags/"
+                href="Eversity-Docs/ru/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="/tags/"
+                href="Eversity-Docs/tags/"
                 />
   </url>
 </urlset>

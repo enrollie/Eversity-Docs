@@ -25,7 +25,7 @@ languages:
                   url: archives
                   weight: 5
                 - name: API specification
-                  url: /api.html
+                  url: api.html
                   weight: 10
     ru:
         languageName: ":ru:"

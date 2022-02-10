@@ -172,7 +172,8 @@ paths:
         required: true
     get:
       summary: Get user's class if present
-      tags: []
+      tags:
+        - User
       responses:
         '200':
           description: OK
@@ -664,7 +665,8 @@ paths:
   /absence/noData:
     get:
       summary: Get list of classes without absence data
-      tags: []
+      tags:
+        - Absence
       responses:
         '200':
           description: OK
@@ -843,7 +845,8 @@ paths:
   /templating/generate:
     get:
       summary: Generate template and fill it with data
-      tags: []
+      tags:
+        - Templating
       responses:
         '200':
           description: OK
@@ -904,7 +907,8 @@ paths:
   /school:
     get:
       summary: Returns data about school
-      tags: []
+      tags:
+        - School
       responses:
         '200':
           description: OK
@@ -936,7 +940,8 @@ paths:
   /school/classes:
     get:
       summary: Get list of classes
-      tags: []
+      tags:
+        - School
       responses:
         '200':
           description: OK
@@ -1767,5 +1772,3 @@ components:
       description: Class ID
 security:
   - JWT: []
-tags:
-  - name: User

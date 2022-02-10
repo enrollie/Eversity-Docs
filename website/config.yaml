@@ -24,6 +24,9 @@ languages:
                 - name: Archives
                   url: archives
                   weight: 5
+                - name: API specification
+                  url: /api.html
+                  weight: 10
     ru:
         languageName: ":ru:"
         languageAltTitle: "Русский"
@@ -33,6 +36,9 @@ languages:
                 - name: Архив
                   url: archives
                   weight: 5
+                - name: Спецификация API (англ.)
+                  url: ../api.html
+                  weight: 10
 
 outputs:
     home:

@@ -34,6 +34,8 @@ paths:
                   value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJFbnJvbGxpZS9FdmVyc2l0eUpXVCIsImlzcyI6IkVucm9sbGllLUV2ZXJzaXR5SldUIiwidXNlcklEIjoiMTMzNzY5IiwidG9rZW4iOiIzOGZjOGYxZC0wYWFiLTQ2NWQtYjI4Ni1kMGViZDFlYmJhNDMifQ.kAeoAX0Q7FeMegDOPAMiYcXPWjAnGcNVTI9MkTbLAGk
         '401':
           description: 'Returned, when Schools.by rejected user''s credentials'
+        '403':
+          description: User is disabled
         '503':
           description: 'Schools.by is unavailable, so authorization cannot happen'
           headers:
@@ -163,38 +165,6 @@ paths:
           $ref: '#/components/responses/User-not-found'
       operationId: get-users-userId
       description: Retrieve the information of the user with the matching user ID.
-  '/users/{userId}/class':
-    parameters:
-      - schema:
-          type: string
-        name: userId
-        in: path
-        required: true
-    get:
-      summary: Get user's class if present
-      tags:
-        - User
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  class:
-                    oneOf:
-                      - $ref: '#/components/schemas/Class'
-                      - type: 'null'
-                        properties: {}
-                  role:
-                    type:
-                      - string
-                      - 'null'
-        '404':
-          $ref: '#/components/responses/User-not-found'
-      operationId: get-users-userId-class
-      description: 'If user persistently belongs to class (doesn''t matter: Pupil or class teacher) will respond with user''s class'
   '/user/{userId}/timetable':
     parameters:
       - name: userId
@@ -1005,7 +975,7 @@ paths:
 components:
   schemas:
     User:
-      description: 'User datascheme. Middle name is null for everyone except Teacher, Administration, and Social type.'
+      description: User datascheme
       type: object
       x-examples:
         example-1:
@@ -1049,18 +1019,19 @@ components:
         lastName:
           type: string
           minLength: 1
-        classId:
-          type:
-            - integer
-            - 'null'
+        schoolClass:
           description: May be absent from some outputs of server
-          readOnly: true
+          oneOf:
+            - $ref: '#/components/schemas/Class'
+            - type: 'null'
+              properties: {}
       required:
         - id
         - type
         - firstName
         - middleName
         - lastName
+      title: User
     Timetable:
       description: Contains timetables for each of two shifts
       type: object

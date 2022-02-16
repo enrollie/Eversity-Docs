@@ -21,7 +21,7 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -30,8 +30,10 @@ paths:
                   token:
                     type: string
               examples:
-                Example token:
-                  value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJFbnJvbGxpZS9FdmVyc2l0eUpXVCIsImlzcyI6IkVucm9sbGllLUV2ZXJzaXR5SldUIiwidXNlcklEIjoiMTMzNzY5IiwidG9rZW4iOiIzOGZjOGYxZC0wYWFiLTQ2NWQtYjI4Ni1kMGViZDFlYmJhNDMifQ.kAeoAX0Q7FeMegDOPAMiYcXPWjAnGcNVTI9MkTbLAGk
+                example-1:
+                  value:
+                    userID: string
+                    token: string
         '401':
           description: 'Returned, when Schools.by rejected user''s credentials'
         '403':
@@ -152,13 +154,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
               examples:
-                Administration user info:
+                example-1:
                   value:
                     id: 12753
-                    type: Administration
+                    type: TEACHER
                     firstName: Степан
                     middleName: Андреевич
                     lastName: Стэтхем
+                    classID: null
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -253,25 +256,26 @@ paths:
               schema:
                 type: object
                 properties:
+                  serverTime:
+                    type: string
+                    format: date-time
                   lesson:
                     oneOf:
                       - $ref: '#/components/schemas/Lesson-data'
                       - type: 'null'
-                        properties: {}
               examples:
-                Lesson:
+                Example:
                   value:
-                    place: 5
-                    title: Всемир. ист.
-                    schedule:
-                      startH: 13
-                      startM: 0
-                      endH: 13
-                      endM: 45
-                    classID: 26215
-                No lesson:
-                  value:
-                    lesson: null
+                    serverTime: '2019-08-24T14:15:22Z'
+                    lesson:
+                      place: 5
+                      title: Всемир. ист.
+                      schedule:
+                        startH: 13
+                        startM: 0
+                        endH: 13
+                        endM: 45
+                      classID: 26215
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':

@@ -1,17 +1,29 @@
 openapi: 3.1.0
 info:
-  title: Eversity JWT
-  version: 0.9.0
+  title: Eversity API
+  version: 1.0.0-beta
   summary: Eversity Server API
   description: 'Eversity API. As every server is (at least now) self-hosted, there are no public test servers (however, some public mock servers are being thought of)'
   license:
     name: GNU AGPL-3.0
     identifier: AGPL-3.0-only
-  contact:
-    url: 'https://github.com/enrollie/Eversity-Server'
+  contact: {}
 servers:
   - url: 'http://localhost:8081'
-    description: Local test server
+    description: Your local test server
+tags:
+  - name: Auth
+    description: Everything related to Authentication process
+  - name: User
+    description: Everything about User
+  - name: Class
+    description: Everything about school classes
+  - name: Absence
+    description: Everything about Absence accounting
+  - name: Templating
+    description: Everything about access to Eversity Templating engine
+  - name: School
+    description: Everything about school itself
 paths:
   /auth/login:
     post:
@@ -32,8 +44,8 @@ paths:
               examples:
                 example-1:
                   value:
-                    userID: string
-                    token: string
+                    userID: '123'
+                    token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJFbnJvbGxpZS9FdmVyc2l0eUpXVCIsImlzcyI6IkVucm9sbGllLUV2ZXJzaXR5SldUIiwidXNlcklEIjoiMTMzNzY5IiwidG9rZW4iOiIzOGZjOGYxZC0wYWFiLTQ2NWQtYjI4Ni1kMGViZDFlYmJhNDMifQ.kAeoAX0Q7FeMegDOPAMiYcXPWjAnGcNVTI9MkTbLAGk
         '401':
           description: 'Returned, when Schools.by rejected user''s credentials'
         '403':
@@ -408,68 +420,6 @@ paths:
         schema:
           type: integer
         description: Class ID
-    get:
-      summary: Get class's absence
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  description: 'Pair of (Pupil, absenceList)'
-                  properties:
-                    pupil:
-                      $ref: '#/components/schemas/User'
-                    absences:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Absence'
-              examples:
-                example-1:
-                  value:
-                    - pupil:
-                        id: 124
-                        type: PUPIL
-                        firstName: Степан
-                        middleName: Андреевич
-                        lastName: Стэтхем
-                        classID: null
-                      absences:
-                        - pupilId: 0
-                          classId: 0
-                          date: '2019-08-24'
-                          reason: ILLNESS
-                          lessonsList:
-                            - 0
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/Class-not-found'
-      operationId: get-classes-classId-absence
-      description: Gets absences summary for range of given dates (defaults to request date week)
-      parameters:
-        - schema:
-            type: string
-            format: date
-            pattern: '([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))'
-          in: query
-          name: startDate
-          allowEmptyValue: true
-          description: Range begin date in YYYY-MM-dd format
-          style: form
-        - schema:
-            type: string
-            format: date
-          in: query
-          name: endDate
-          description: Range end date in YYYY-MM-dd format
-          style: form
-      tags:
-        - Class
-        - Absence
     post:
       summary: Send absence data
       operationId: post-class-classId-absence
@@ -561,6 +511,13 @@ paths:
                   $ref: '#/components/schemas/User'
       operationId: get-class-classId-pupils
       description: Returns class pupils list
+      parameters:
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: date
+          description: 'Request pupils list at specific date. Use case: pupil left school on April 12, and request is initiated on April 24, so this pupil is no longer listed, but if you set date=2020--01-20, it will be listed'
   '/class/{classId}/timetable':
     parameters:
       - $ref: '#/components/parameters/classId'
@@ -837,22 +794,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    firstName:
-                      type: string
-                    middleName:
-                      type:
-                        - string
-                        - 'null'
-                    lastName:
-                      type: string
-                    absenceReason:
-                      $ref: '#/components/schemas/Absence-reason'
-                    classId:
-                      type: integer
+                  $ref: '#/components/schemas/Absence'
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: get-absence-statistics-extended
@@ -862,7 +804,7 @@ paths:
             type: string
           in: query
           name: date
-          description: Return data for given date
+          description: Return absence data for given date
     parameters: []
   /templating/generate:
     get:
@@ -976,6 +918,74 @@ paths:
               examples: {}
       operationId: get-school-classes
       description: 'Returns list of classes, registered in school'
+  /school/users:
+    get:
+      summary: Get full list of users
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              examples:
+                Example:
+                  value:
+                    - id: 12753
+                      type: TEACHER
+                      firstName: Степан
+                      middleName: Андреевич
+                      lastName: Стэтхем
+                      classID: null
+                    - id: 127523
+                      type: PUPIL
+                      firstName: Андрей
+                      middleName: null
+                      lastName: Стэтхем
+                      classID: 26212
+      operationId: get-school-users
+      description: Returns list of users in database
+      parameters:
+        - schema:
+            type: string
+            format: date
+          in: query
+          name: date
+          description: Date to compute request (useful to deal with disabled users)
+        - schema:
+            type: array
+            uniqueItems: true
+            minItems: 1
+          in: query
+          name: type
+          description: 'Filter output to contain only selected. Allowed values: any user type'
+          style: form
+          explode: true
+  /ping:
+    get:
+      summary: Ping server
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Pong!
+              examples:
+                Example:
+                  value:
+                    message: Pong!
+      operationId: get-ping
+      security: []
+      description: Returns basic "Pong!" message that indicates that server is fully functional and ready for requests
 components:
   schemas:
     User:
@@ -1596,7 +1606,10 @@ components:
             - 0
       properties:
         pupilId:
-          type: integer
+          type:
+            - integer
+            - 'null'
+          description: ID of absent pupil. Null if all pupils in class are present (null may be returned by get-class-absence and get-absence-statistics-detailed endpoints)
         classId:
           type: integer
           readOnly: true
@@ -1639,14 +1652,6 @@ components:
       examples:
         - ILLNESS
       description: Reason of pupil's absence
-    Date:
-      type: string
-      title: Date
-      description: Date
-      pattern: '([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))'
-      format: date
-      examples:
-        - '2019-08-24'
     User-Type:
       type: string
       title: User-Type
@@ -1664,6 +1669,7 @@ components:
     JWT:
       type: http
       scheme: bearer
+      description: JWT token that is issued using /auth/login endpoint
   responses:
     Unauthorized:
       description: Supplied token was not approved by server

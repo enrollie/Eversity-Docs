@@ -921,7 +921,8 @@ paths:
   /school/users:
     get:
       summary: Get full list of users
-      tags: []
+      tags:
+        - School
       responses:
         '200':
           description: OK
